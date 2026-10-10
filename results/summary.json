@@ -1,7 +1,7 @@
 {
   "meta": {
     "Wątki rayon": "4",
-    "Czas obliczeń": "0.75 s",
+    "Czas obliczeń": "0.74 s",
     "Wariantów × skali": "70",
     "Klimat wiatrowy": "Weibull k=2.00, średnia 6.5 m/s na 100 m, ścinanie α=0.20",
     "Jakość siatki": "Grid { n_stations: 32, n_tubes: 18, n_az: 120 }"
