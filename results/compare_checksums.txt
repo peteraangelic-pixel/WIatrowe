@@ -1,3 +1,3 @@
-porównano 158 punktów (Rust vs Python)
-największa różnica: 0.000e+00 w None
-OK: implementacje zgodne w granicach tolerancji
+porównano 272 punktów (Rust vs Python, wiersz po wierszu)
+największa różnica: 0.000e+00
+OK: obie implementacje dają identyczne wyniki (do 1e-09)
