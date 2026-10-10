@@ -27,11 +27,6 @@ fn get<'a>(m: &'a std::collections::HashMap<String, String>, k: &str, d: &'a str
     m.get(k).map(|s| s.as_str()).unwrap_or(d)
 }
 
-fn bar(v: f64, max: f64, width: usize) -> String {
-    let n = ((v / max.max(1e-9)) * width as f64).round() as usize;
-    "#".repeat(n.min(width)) + &".".repeat(width - n.min(width))
-}
-
 fn print_table(v: &[wiatrowe::sweep::Variant], limit: usize) {
     println!(
         "{:<38} {:>7} {:>8} {:>7} {:>6} {:>9} {:>7} {:>9} {:>8}",

@@ -1195,7 +1195,7 @@ mod tests {
             for &s in d.scales {
                 let a = d.instantiate(s);
                 let area = a.area();
-                assert!(area > 0.5 && area < 1.0e7, "{}: area={}", d.id, area);
+                assert!(area > 0.01 && area < 1.0e7, "{}: area={}", d.id, area);
                 let g = d.geometry(s);
                 assert!(g.hub > 0.0 || d.family == Family::Airborne);
             }

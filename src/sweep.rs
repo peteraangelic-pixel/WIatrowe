@@ -228,26 +228,25 @@ fn interpolate(curve: &[(f64, f64)], v: f64) -> f64 {
 
 /// Zastosowanie ograniczenia mocy znamionowej (regulacja kąta łopat).
 fn apply_rating(d: &Design, curve: &mut Vec<(f64, f64)>) -> (f64, f64) {
-    let mut peak = 0.0;
-    let mut rated = 0.0;
+    // Maszyny z regulacją kąta łopat utrzymują moc znamionową powyżej V_nom.
+    // Bez regulacji moc rośnie dalej, więc generator i konstrukcja muszą
+    // przyjąć szczyt - to widać potem w koszcie i w capacity factor.
     if d.ctrl.pitch_control {
-        rated = interpolate(curve, d.ctrl.v_rated);
+        let rated = interpolate(curve, d.ctrl.v_rated);
         for (_, p) in curve.iter_mut() {
             if *p > rated {
                 *p = rated;
             }
         }
-        peak = rated;
+        (rated, rated)
     } else {
-        // Brak regulacji: moc rośnie dalej, więc generator musi przyjąć szczyt.
-        for (v, p) in curve.iter() {
-            if *v <= d.ctrl.v_out && *p > peak {
-                peak = *p;
-            }
-        }
-        rated = peak;
+        let peak = curve
+            .iter()
+            .filter(|(v, _)| *v <= d.ctrl.v_out)
+            .map(|(_, p)| *p)
+            .fold(0.0, f64::max);
+        (peak, peak)
     }
-    (rated, peak)
 }
 
 /// Główne przeliczenie całego katalogu.

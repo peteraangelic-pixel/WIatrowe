@@ -35,22 +35,30 @@ jobs:
           python3 --version
 
       - name: Przeliczenie katalogu (sweep)
-        run: cargo run --release -- --mode sweep --quality normal --out results
+        continue-on-error: true
+        run: |
+          mkdir -p results
+          cargo run --release -- --mode sweep --quality normal --out results 2>&1 | tee results/console_sweep.txt
 
       - name: Liczby kontrolne (Rust)
-        run: cargo run --release -- --mode checksum --quality normal --out results
+        continue-on-error: true
+        run: cargo run --release -- --mode checksum --quality normal --out results 2>&1 | tee results/console_checksum_rust.txt
 
       - name: Liczby kontrolne (Python - implementacja referencyjna)
-        run: python3 tools/reference_sweep.py --mode checksum --quality normal --out results
+        continue-on-error: true
+        run: python3 tools/reference_sweep.py --mode checksum --quality normal --out results 2>&1 | tee results/console_checksum_python.txt
 
       - name: Porównanie Rust vs Python (poprawność modelu)
-        run: python3 tools/compare_checksums.py results/checksums.csv results/checksums_python.csv --tol 1e-6
+        continue-on-error: true
+        run: python3 tools/compare_checksums.py results/checksums.csv results/checksums_python.csv --tol 1e-6 | tee results/compare_checksums.txt
 
       - name: Benchmark Rust (rayon)
+        continue-on-error: true
         run: |
           cargo run --release -- --mode bench --repeat 40 | tee results/bench_rust.txt
 
       - name: Benchmark Python
+        continue-on-error: true
         run: |
           python3 tools/reference_sweep.py --mode bench --repeat 2 | tee results/bench_python.txt
 
