@@ -1,10 +1,10 @@
 implementacja         wątki       czas [s]    ewaluacji/s
 ----------------------------------------------------------
-Python                    1         25.516          268.8
+Python                    1         17.963          381.9
 ----------------------------------------------------------
-Rust+rayon                1         15.790         8689.3   x32.3 vs Python
-Rust+rayon                2          7.899        17368.6   x64.6 vs Python
-Rust+rayon                4          5.261        26076.7   x97.0 vs Python
+Rust+rayon                1         12.903        10632.9   x27.8 vs Python
+Rust+rayon                2          6.542        20973.1   x54.9 vs Python
+Rust+rayon                4          4.690        29253.1   x76.6 vs Python
 ----------------------------------------------------------
-Najszybszy wariant: Rust + rayon na 4 wątkach - 97 razy szybciej niż jednowątkowy Python.
+Najszybszy wariant: Rust + rayon na 4 wątkach - 77 razy szybciej niż jednowątkowy Python.
 Uwaga: workload jest identyczny (ta sama liczba ewaluacji modelu aerodynamicznego), Python jest czysty (bez numpy).
