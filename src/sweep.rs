@@ -233,7 +233,7 @@ fn interpolate(curve: &[(f64, f64)], v: f64) -> f64 {
 /// w rzeczywistości są chronione przed przeciążeniem odchyleniem z wiatru,
 /// przeciągnięciem albo hamulcem generatora - modelujemy to jako ograniczenie
 /// mocy do 1.20 * P(V_nom) (typowy przester maszyny stall-regulated).
-fn apply_rating(d: &Design, curve: &mut Vec<(f64, f64)>) -> (f64, f64) {
+fn apply_rating(d: &Design, curve: &mut [(f64, f64)]) -> (f64, f64) {
     let p_rated = interpolate(curve, d.ctrl.v_rated);
     let cap = if d.ctrl.pitch_control {
         p_rated

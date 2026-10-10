@@ -34,9 +34,7 @@ fn esc(s: &str) -> String {
 
 fn fmt_tick(v: f64) -> String {
     let a = v.abs();
-    if a >= 1000.0 {
-        format!("{:.0}", v)
-    } else if a >= 10.0 {
+    if a >= 10.0 {
         format!("{:.0}", v)
     } else if a >= 1.0 {
         format!("{:.1}", v)
@@ -46,7 +44,7 @@ fn fmt_tick(v: f64) -> String {
 }
 
 fn nice_ticks(lo: f64, hi: f64, n: usize) -> Vec<f64> {
-    if !(hi > lo) {
+    if hi <= lo {
         return vec![lo];
     }
     let raw = (hi - lo) / n as f64;
@@ -72,6 +70,7 @@ fn nice_ticks(lo: f64, hi: f64, n: usize) -> Vec<f64> {
 }
 
 /// Wykres liniowy z osiami i siatką.
+#[allow(clippy::too_many_arguments)]
 pub fn line_chart(
     w: f64,
     h: f64,
@@ -117,10 +116,10 @@ pub fn line_chart(
         ylo = a;
         yhi = b;
     }
-    if !(yhi > ylo) {
+    if yhi <= ylo {
         yhi = ylo + 1.0;
     }
-    if !(xhi > xlo) {
+    if xhi <= xlo {
         xhi = xlo + 1.0;
     }
     let ypad = 0.06 * (yhi - ylo);
@@ -322,10 +321,10 @@ pub fn sparkline(points: &[(f64, f64)], color: &str, w: f64, h: f64) -> String {
     }
     let xlo = points[0].0;
     let xhi = points[points.len() - 1].0;
-    if !(hi > lo) {
+    if hi <= lo {
         hi = lo + 1.0;
     }
-    if !(xhi > xlo) {
+    if xhi <= xlo {
         return String::new();
     }
     let mut d = String::new();
