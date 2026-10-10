@@ -6,13 +6,13 @@
    Compiling rayon-core v1.13.0
    Compiling rayon v1.12.0
    Compiling wiatrowe v0.1.0 (/home/runner/work/WIatrowe/WIatrowe)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.69s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 3.17s
      Running unittests src/lib.rs (target/debug/deps/wiatrowe-77c20b275a126b1a)
 
 running 25 tests
 test airfoil::tests::foil_attached_slope_is_sane ... ok
-test airfoil::tests::foil_stalls ... ok
 test airfoil::tests::foil_glide_ratio_in_range ... ok
+test airfoil::tests::foil_stalls ... ok
 test airfoil::tests::magnus_saturates ... ok
 test bemt::tests::ct_in_physical_range ... ok
 test bemt::tests::cp_respects_betz ... ok
@@ -33,10 +33,10 @@ test simple::tests::savonius_is_in_literature_range ... ok
 test simple::tests::venturi_never_beats_betz_per_inlet_area ... ok
 test simple::tests::viv_has_narrow_band ... ok
 test dmst::tests::higher_solidity_lowers_optimal_tsr ... ok
-test climate::tests::pdf_integrates_to_one ... ok
 test climate::tests::mean_of_distribution_matches_input ... ok
+test climate::tests::pdf_integrates_to_one ... ok
 
-test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.41s
+test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.43s
 
      Running unittests src/main.rs (target/debug/deps/wiatrowe-dd2e58c5828b3abe)
 
