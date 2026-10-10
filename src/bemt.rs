@@ -3,14 +3,14 @@
 //!
 //! Sformułowanie wg Burton et al., "Wind Energy Handbook":
 //!   * strata końcówki łopaty (Prandtl) oraz piasty,
-//!   * poprawka Glauerta/Buhla dla dużej indukcji osiowej (a > 0.4),
-//!   * relaksacja 0.3, ~80 iteracji na element.
+//!   * poprawka Glauerta dla dużej indukcji osiowej (CT > 0.96),
+//!   * równanie równowagi rozwiązywane w kącie napływu (bisekcja).
 //!
 //! Wielkości są bezwymiarowe względem *lokalnej* prędkości napływu V i promienia R,
 //! dzięki czemu ten sam solver można użyć w dyfuzorze (V = a_v * V_inf).
 
 use crate::airfoil::Polar;
-use crate::{clamp, DEG2RAD};
+use crate::{clamp, DEG2RAD, RAD2DEG};
 
 /// Geometria wirnika o poziomej osi (lub "łopatowego" wirnika Magnusa).
 #[derive(Clone, Debug)]
@@ -124,6 +124,29 @@ fn is_magnus(p: &Polar) -> bool {
 }
 
 /// Główny solver BEMT.
+/// Czynnik straty końcówki / piasty (Prandtla).
+#[inline]
+fn prandtl(arg: f64) -> f64 {
+    let t = (-arg.max(0.0)).exp().min(1.0);
+    (2.0 / std::f64::consts::PI) * t.acos()
+}
+
+/// Równanie równowagi elementu łopaty rozwiązywane w kącie napływu.
+///
+/// Szukamy `phi`, dla którego trójkąt prędkości i teoria pędu dają ten sam
+/// stan elementu:
+///
+/// ```text
+/// (1 - a) * cos(phi) - lambda_r * (1 + ap) * sin(phi) = 0
+/// ```
+///
+/// przy czym `a` i `ap` dla danego `phi` wyznaczamy wprost z teorii pędu
+/// (z poprawką Glauerta na stan turbulent wake). Klasyczna iteracja punktu
+/// stałego (a, ap) nie zbiega przy dużym obciążeniu elementu (duża
+/// solidność, niskie lambda, głęboki stall) - wtedy wynik zależy od kolejności
+/// zaokrągleń i nie da się go powtórzyć w drugiej implementacji. Bisekcja po
+/// `phi` jest deterministyczna, więc implementacja w Rust i w Pythonie dają
+/// te same liczby (co sprawdzamy w CI).
 pub fn solve(rotor: &HawtRotor, cfg: &BemtCfg) -> BemtOut {
     let magnus = is_magnus(&rotor.polar);
     let n = cfg.n_stations.max(8);
@@ -131,6 +154,7 @@ pub fn solve(rotor: &HawtRotor, cfg: &BemtCfg) -> BemtOut {
     let dx = (1.0 - x0) / n as f64;
     let lambda = cfg.lambda.max(1e-3);
     let b = rotor.n_blades as f64;
+    let pitch = cfg.pitch_deg * DEG2RAD;
 
     let mut cp = 0.0;
     let mut ct = 0.0;
@@ -143,106 +167,79 @@ pub fn solve(rotor: &HawtRotor, cfg: &BemtCfg) -> BemtOut {
         let lambda_r = lambda * x;
         let chord = rotor.chord(x);
         let sigma = b * chord / (2.0 * std::f64::consts::PI * x * rotor.radius);
+        let twist = rotor.twist_rad(x);
+        let spin = if magnus { cfg.spin_ratio } else { 0.0 };
 
-        let mut a: f64 = 0.30;
-        let mut ap: f64 = 0.01;
-        let mut phi = 0.2;
-        let mut ok = false;
-
-        for _it in 0..90 {
-            // Kąt napływu z uwzględnieniem indukcji osiowej i obwodowej.
-            let phi_new = (1.0 - a).atan2(lambda_r * (1.0 + ap));
-            let alpha_deg = phi_new * crate::RAD2DEG - rotor.twist_rad(x) * crate::RAD2DEG
-                - cfg.pitch_deg;
-
-            // Dla Magnusa: k = omega_spin*r_cyl / W; z definicji k zadajemy,
-            // więc nie trzeba liczyć W (moc obrotu cylindrów policzymy niżej).
-            let cl = rotor.polar.cl(alpha_deg, cfg.spin_ratio);
-            let cd = rotor.polar.cd(alpha_deg, cfg.spin_ratio);
-
-            let sin_p = phi_new.sin().max(1e-4);
-            let cos_p = phi_new.cos();
-            let cn = cl * cos_p + cd * sin_p;
-            let ctan = cl * sin_p - cd * cos_p;
-
-            // Straty końcówki (Prandtl) i piasty.
-            let f_tip = if b < 100.0 {
-                let arg = -(b * (1.0 - x) / (2.0 * x * sin_p)).exp().min(1.0);
-                (2.0 / std::f64::consts::PI) * arg.acos()
-            } else {
-                1.0
-            };
+        // Stan elementu (a, a', F) dla zadanego kąta napływu.
+        let state = |phi: f64| -> (f64, f64, f64, f64) {
+            let s = phi.sin().max(1e-6);
+            let c = phi.cos();
+            let alpha_deg = (phi - twist - pitch) * RAD2DEG;
+            let cl = rotor.polar.cl(alpha_deg, spin);
+            let cd = rotor.polar.cd(alpha_deg, spin);
+            let cn = cl * c + cd * s;
+            let ctan = cl * s - cd * c;
+            let f_tip = prandtl(b * (1.0 - x) / (2.0 * x * s));
             let f_hub = if rotor.hub_frac > 0.01 {
-                let arg = -(b * (x - rotor.hub_frac) / (2.0 * rotor.hub_frac * sin_p))
-                    .exp()
-                    .min(1.0);
-                (2.0 / std::f64::consts::PI) * arg.acos()
+                prandtl(b * (x - rotor.hub_frac) / (2.0 * rotor.hub_frac * s))
             } else {
                 1.0
             };
-            let f = (f_tip * f_hub).clamp(0.05, 1.0);
+            let f = clamp(f_tip * f_hub, 0.05, 1.0);
 
-            // Indukcja osiowa z poprawką Glauerta dla a > a_c.
-            let ct_local = sigma * cn * (1.0 - a) * (1.0 - a) / (sin_p * sin_p);
-            let a_new = if ct_local <= 0.96 {
-                0.5 * (1.0 - (1.0 - ct_local.max(0.0)).max(0.0).sqrt())
-            } else {
-                let ac = 0.4;
-                (ct_local / 4.0 - ac * ac) / (1.0 - 2.0 * ac)
-            };
-            let a_new = clamp(a_new, -0.6, 0.92);
+            // Relacja pędu: a/(1-a) = sigma*cn/(4*F*sin^2(phi))
+            let den = 4.0 * f * s * s + sigma * cn;
+            let mut a = if den.abs() > 1e-12 { sigma * cn / den } else { 0.0 };
+            let ct_loc = 4.0 * a * (1.0 - a) * f;
+            if ct_loc > 0.96 {
+                // Poprawka Glauerta: stan "turbulent wake" (CT > 0.96).
+                a = (ct_loc / 4.0 - 0.16) / 0.2;
+            }
+            let a = clamp(a, -0.6, 0.92);
 
-            let denom = 4.0 * f * sin_p * cos_p;
-            let ap_new = if denom.abs() > 1e-9 && ctan.abs() > 1e-12 {
-                let d = denom / (sigma * ctan);
-                if d > 1.0 {
+            // Relacja pędu obwodowego: ap/(1+ap) = sigma*ctan/(4*F*sin*cos)
+            let ap = if (sigma * ctan).abs() > 1e-12 && c.abs() > 1e-9 {
+                let d = 4.0 * f * s * c / (sigma * ctan);
+                if (d - 1.0).abs() > 1e-12 {
                     1.0 / (d - 1.0)
                 } else {
-                    // Element hamujący / odwrócony znak - ograniczamy.
-                    -0.5
+                    3.0
                 }
             } else {
                 0.0
             };
-            let ap_new = clamp(ap_new, -0.5, 3.0);
+            let ap = clamp(ap, -0.5, 3.0);
+            (a, ap, f, s)
+        };
 
-            let da = (a_new - a).abs() + (ap_new - ap).abs();
-            // Relaksacja (0.3) - standard dla stabilności BEM.
-            a += 0.3 * (a_new - a);
-            ap += 0.3 * (ap_new - ap);
-            phi = phi_new;
+        let residual = |phi: f64| -> f64 {
+            let (a, ap, _f, s) = state(phi);
+            (1.0 - a) * phi.cos() - lambda_r * (1.0 + ap) * s
+        };
 
-            if da < 1e-7 {
-                ok = true;
-                break;
-            }
-        }
-        if !ok || a > 0.5 {
-            // a > 0.5 oznacza wyjście poza zakres ważności teorii pędu
-            // (stan "turbulent wake") - wynik tego elementu jest niewiarygodny.
+        let mut lo = 1e-4_f64;
+        let mut hi = std::f64::consts::FRAC_PI_2 - 1e-4;
+        let rlo = residual(lo);
+        if (rlo > 0.0) == (residual(hi) > 0.0) {
+            // Brak zmiany znaku: element nie oddaje mocy w tym punkcie pracy.
             converged = false;
         }
-
-        let sin_p = phi.sin().max(1e-4);
-        let f_tip = if b < 100.0 {
-            let arg = -(b * (1.0 - x) / (2.0 * x * sin_p)).exp().min(1.0);
-            (2.0 / std::f64::consts::PI) * arg.acos()
-        } else {
-            1.0
-        };
-        let f_hub = if rotor.hub_frac > 0.01 {
-            let arg = -(b * (x - rotor.hub_frac) / (2.0 * rotor.hub_frac * sin_p))
-                .exp()
-                .min(1.0);
-            (2.0 / std::f64::consts::PI) * arg.acos()
-        } else {
-            1.0
-        };
-        let f = (f_tip * f_hub).clamp(0.05, 1.0);
+        for _ in 0..46 {
+            let mid = 0.5 * (lo + hi);
+            if (residual(mid) > 0.0) == (rlo > 0.0) {
+                lo = mid;
+            } else {
+                hi = mid;
+            }
+        }
+        let phi = 0.5 * (lo + hi);
+        let (a, ap, f, s) = state(phi);
 
         // Prędkość względna elementu (w jednostkach V): W = (1-a)/sin(phi)
-        let w = ((1.0 - a) / sin_p).abs();
+        let w = ((1.0 - a) / s).abs();
 
+        // Moc na wale z momentu elementu (poprawna przy niezerowym oporze
+        // profilu - forma pędowa by ją przeszacowała o straty profilowe).
         cp += 8.0 * lambda * lambda * x * x * x * ap * (1.0 - a) * f * dx;
         ct += 8.0 * a * (1.0 - a) * f * x * dx;
         cp_swirl += 8.0 * lambda * lambda * x * x * x * (1.0 - a) * ap * ap * f * dx;
@@ -250,7 +247,7 @@ pub fn solve(rotor: &HawtRotor, cfg: &BemtCfg) -> BemtOut {
         if magnus {
             // Moc potrzebna na utrzymanie obrotu cylindrów:
             // P = 0.5*rho*(k*W)^3 * (pi*d*dr) * cf  (tarcie powierzchniowe)
-            // znormalizowana do 0.5*rho*V^3*pi*R^2:
+            // znormalizowana do 0.5*rho*V^3*pi*R^2.
             let d_frac = chord / rotor.radius; // średnica cylindra jako ułamek R
             let surf = std::f64::consts::PI * d_frac * dx; // pi*d*dr / R^2
             let v_surf = cfg.spin_ratio * w; // prędkość powierzchni / V

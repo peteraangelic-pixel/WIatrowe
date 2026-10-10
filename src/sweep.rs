@@ -226,27 +226,31 @@ fn interpolate(curve: &[(f64, f64)], v: f64) -> f64 {
     p0 + (p1 - p0) * t
 }
 
-/// Zastosowanie ograniczenia mocy znamionowej (regulacja kąta łopat).
+/// Zastosowanie ograniczenia mocy znamionowej.
+///
+/// Maszyny z regulacją kąta łopat trzymają moc znamionową powyżej V_nom.
+/// Maszyny bez regulacji (Savonius, wiatrak farmerski, latawiec, windbelt)
+/// w rzeczywistości są chronione przed przeciążeniem odchyleniem z wiatru,
+/// przeciągnięciem albo hamulcem generatora - modelujemy to jako ograniczenie
+/// mocy do 1.20 * P(V_nom) (typowy przester maszyny stall-regulated).
 fn apply_rating(d: &Design, curve: &mut Vec<(f64, f64)>) -> (f64, f64) {
-    // Maszyny z regulacją kąta łopat utrzymują moc znamionową powyżej V_nom.
-    // Bez regulacji moc rośnie dalej, więc generator i konstrukcja muszą
-    // przyjąć szczyt - to widać potem w koszcie i w capacity factor.
-    if d.ctrl.pitch_control {
-        let rated = interpolate(curve, d.ctrl.v_rated);
-        for (_, p) in curve.iter_mut() {
-            if *p > rated {
-                *p = rated;
-            }
-        }
-        (rated, rated)
+    let p_rated = interpolate(curve, d.ctrl.v_rated);
+    let cap = if d.ctrl.pitch_control {
+        p_rated
     } else {
-        let peak = curve
-            .iter()
-            .filter(|(v, _)| *v <= d.ctrl.v_out)
-            .map(|(_, p)| *p)
-            .fold(0.0, f64::max);
-        (peak, peak)
+        p_rated * 1.20
+    };
+    for (_, p) in curve.iter_mut() {
+        if *p > cap {
+            *p = cap;
+        }
     }
+    let peak = curve
+        .iter()
+        .filter(|(v, _)| *v <= d.ctrl.v_out)
+        .map(|(_, p)| *p)
+        .fold(0.0, f64::max);
+    (p_rated.max(0.0), peak.max(p_rated))
 }
 
 /// Główne przeliczenie całego katalogu.

@@ -109,16 +109,35 @@ class BemtOut:
 
 
 def _prandtl(arg):
-    return (2.0 / math.pi) * math.acos(min(1.0, math.exp(-arg)))
+    """Czynnik straty końcówki/piasty (Prandtla)."""
+    return (2.0 / math.pi) * math.acos(min(1.0, math.exp(-max(arg, 0.0))))
 
 
 def bemt(rotor, lam, pitch_deg=0.0, n_st=32, spin=0.0):
+    """BEMT: równanie równowagi rozwiązywane w kącie napływu (bisekcja).
+
+    Klasyczna iteracja punktu stałego (a, a') nie zbiega przy dużym
+    obciążeniu elementu (wysoka solidność, niskie lambda, głęboki stall) -
+    wtedy wynik zależy od kolejności zaokrągleń i jest niepowtarzalny.
+    Zamiast tego szukamy kąta napływu phi z równania trójkąta prędkości
+
+        (1 - a) * cos(phi) - lam_r * (1 + ap) * sin(phi) = 0
+
+    przy czym a i ap dla danego phi wyznaczamy wprost z teorii pędu
+    (z poprawką Glauerta na stan turbulent wake). Funkcja jest monotoniczna
+    w przybliżeniu, więc bisekcja daje wynik deterministyczny i identyczny
+    w obu implementacjach (Rust / Python).
+    """
     R = rotor.R
     x0 = max(rotor.hub, 0.02)
     dx = (1.0 - x0) / n_st
     B = float(rotor.B)
     lam = max(lam, 1e-3)
     magnus = isinstance(rotor.polar, Magnus)
+    pitch = pitch_deg * D2R
+    spin_k = spin if magnus else 0.0
+    polar = rotor.polar
+    hub = rotor.hub
     cp = ct = sw = spin_cp = 0.0
     ok = True
 
@@ -127,56 +146,58 @@ def bemt(rotor, lam, pitch_deg=0.0, n_st=32, spin=0.0):
         lam_r = lam * x
         chord = rotor.chord(x)
         sigma = B * chord / (2.0 * math.pi * x * R)
-        a, ap, phi = 0.30, 0.01, 0.2
-        converged = False
-        for _ in range(90):
-            phi = math.atan2(1.0 - a, lam_r * (1.0 + ap))
-            alpha = phi - rotor.twist(x) - pitch_deg * D2R
-            cl = rotor.polar.cl(alpha * R2D, spin)
-            cd = rotor.polar.cd(alpha * R2D, spin)
-            sp = max(math.sin(phi), 1e-4)
-            cz = math.cos(phi)
-            cn = cl * cz + cd * sp
-            ctan = cl * sp - cd * cz
-            ft = _prandtl(B * (1.0 - x) / (2.0 * x * sp))
-            fh = _prandtl(B * (x - rotor.hub) / (2.0 * rotor.hub * sp)) if rotor.hub > 0.01 else 1.0
+        twist = rotor.twist(x)
+
+        def stan(phi):
+            s = max(math.sin(phi), 1e-6)
+            c = math.cos(phi)
+            alpha = (phi - twist - pitch) * R2D
+            cl = polar.cl(alpha, spin_k)
+            cd = polar.cd(alpha, spin_k)
+            cn = cl * c + cd * s
+            ctan = cl * s - cd * c
+            ft = _prandtl(B * (1.0 - x) / (2.0 * x * s))
+            fh = _prandtl(B * (x - hub) / (2.0 * hub * s)) if hub > 0.01 else 1.0
             f = clamp(ft * fh, 0.05, 1.0)
-            ct_local = sigma * cn * (1.0 - a) ** 2 / (sp * sp)
-            if ct_local <= 0.96:
-                a_new = 0.5 * (1.0 - math.sqrt(max(0.0, 1.0 - max(0.0, ct_local))))
+            # Relacja pędu: a/(1-a) = sigma*cn/(4*F*sin^2(phi))
+            den = 4.0 * f * s * s + sigma * cn
+            a = sigma * cn / den if abs(den) > 1e-12 else 0.0
+            ct_loc = 4.0 * a * (1.0 - a) * f
+            if ct_loc > 0.96:                 # Glauert: stan turbulent wake
+                a = (ct_loc / 4.0 - 0.16) / 0.2
+            a = clamp(a, -0.6, 0.92)
+            if abs(sigma * ctan) > 1e-12 and abs(c) > 1e-9:
+                d = 4.0 * f * s * c / (sigma * ctan)
+                ap = 1.0 / (d - 1.0) if abs(d - 1.0) > 1e-12 else 3.0
             else:
-                a_new = (ct_local / 4.0 - 0.16) / 0.2
-            a_new = clamp(a_new, -0.6, 0.92)
-            den = 4.0 * f * sp * cz
-            if abs(den) > 1e-9 and abs(ctan) > 1e-12:
-                d = den / (sigma * ctan)
-                ap_new = 1.0 / (d - 1.0) if d > 1.0 else -0.5
+                ap = 0.0
+            ap = clamp(ap, -0.5, 3.0)
+            return a, ap, f, s
+
+        def residuum(phi):
+            a, ap, f, s = stan(phi)
+            return (1.0 - a) * math.cos(phi) - lam_r * (1.0 + ap) * s
+
+        lo, hi = 1e-4, math.pi / 2.0 - 1e-4
+        rlo = residuum(lo)
+        if (rlo > 0.0) == (residuum(hi) > 0.0):
+            ok = False          # brak zmiany znaku - element nie oddaje mocy
+        for _ in range(46):
+            mid = 0.5 * (lo + hi)
+            if (residuum(mid) > 0.0) == (rlo > 0.0):
+                lo = mid
             else:
-                ap_new = 0.0
-            ap_new = clamp(ap_new, -0.5, 3.0)
-            da = abs(a_new - a) + abs(ap_new - ap)
-            a += 0.3 * (a_new - a)
-            ap += 0.3 * (ap_new - ap)
-            if da < 1e-7:
-                converged = True
-                break
-        if not converged or a > 0.5:
-            # a > 0.5: poza zakresem ważności teorii pędu (stan "turbulent wake")
-            ok = False
-        sp = max(math.sin(phi), 1e-4)
-        cz = math.cos(phi)
-        ft = _prandtl(B * (1.0 - x) / (2.0 * x * sp))
-        fh = _prandtl(B * (x - rotor.hub) / (2.0 * rotor.hub * sp)) if rotor.hub > 0.01 else 1.0
-        f = clamp(ft * fh, 0.05, 1.0)
-        w = abs((1.0 - a) / sp)
+                hi = mid
+        phi = 0.5 * (lo + hi)
+        a, ap, f, s = stan(phi)
+        w = abs((1.0 - a) / s)
+        # Moc na wale z momentu elementu (poprawna także przy oporze profilu).
         cp += 8.0 * lam * lam * x ** 3 * ap * (1.0 - a) * f * dx
         ct += 8.0 * a * (1.0 - a) * f * x * dx
         sw += 8.0 * lam * lam * x ** 3 * (1.0 - a) * ap * ap * f * dx
         if magnus:
-            d_frac = chord / R
-            surf = math.pi * d_frac * dx
-            v_surf = spin * w
-            spin_cp += v_surf ** 3 * surf * rotor.polar.cf * B
+            surf = math.pi * (chord / R) * dx
+            spin_cp += (spin_k * w) ** 3 * surf * polar.cf * B
     return BemtOut(cp, ct, sw, spin_cp, ok)
 
 

@@ -1137,13 +1137,16 @@ pub fn catalog() -> Vec<Design> {
             family: Family::Airborne,
             scale_kind: ScaleKind::WingArea,
             scales: &[10.0, 25.0, 50.0, 100.0],
-            hub_base: 0.0,
+            // "wysokość piasty" = wysokość lotu: tam wiatr jest ~20% szybszy.
+            hub_base: 300.0,
             hub_per_scale: 0.0,
             ctrl: Ctrl {
                 lambda_lo: 0.0,
                 lambda_hi: 0.0,
                 tip_speed_max: 0.0,
-                pitch_control: false,
+                // Powyżej V_nom skrzydło zmniejsza kąt natarcia (depower):
+                // moc jest ograniczana, jak przy regulacji kąta łopat.
+                pitch_control: true,
                 v_rated: 14.0,
                 v_in: 4.0,
                 v_out: 28.0,

@@ -36,7 +36,7 @@ fn print_table(v: &[wiatrowe::sweep::Variant], limit: usize) {
     for x in v.iter().take(limit) {
         println!(
             "{:<38} {:>7} {:>8} {:>7} {:>6} {:>9} {:>7} {:>9} {:>8}",
-            format!("{} [{}]", truncate(&x.name, 30), x.id),
+            format!("{} [{}]", truncate(&x.name, 25), x.id),
             fmt(x.scale, 1),
             fmt(x.rated_kw, 0),
             fmt(x.cp_max, 3),

@@ -322,7 +322,12 @@ pub fn capex(design: &Design, aero: &Aero, g: &Geometry, mb: &MassBreakdown, rat
         equipment *= 1.06;
     }
 
-    let height_factor = 1.0 + 0.006 * (g.hub - 80.0).max(0.0);
+    // Dla AWE "hub" to wysokość lotu, a nie wieża - nie ma kosztu dźwigu.
+    let height_factor = if design.family == Family::Airborne {
+        1.0
+    } else {
+        1.0 + 0.006 * (g.hub - 80.0).max(0.0)
+    };
     let bos = K::BOS_FIXED.min(0.35 * equipment)
         + K::BOS_PER_KW * rated_kw * K::install_factor(design.family) * height_factor;
 
