@@ -1,1 +1,1 @@
-[python] checksum: 272 punktów, suma Cp = 35.962949576 -> results/checksums_python.csv
+[python] checksum: 272 punktów, suma Cp = 42.927598995 -> results/checksums_python.csv

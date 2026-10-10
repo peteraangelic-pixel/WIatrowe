@@ -1,2 +1,2 @@
-BENCH_RESULT lang=python threads=1 time_s=17.8872 evals=6860 evals_per_s=383.5
-[python] 6860 ewaluacji w 17.89 s (383.5 ev/s)
+BENCH_RESULT lang=python threads=1 time_s=25.4750 evals=6860 evals_per_s=269.3
+[python] 6860 ewaluacji w 25.48 s (269.3 ev/s)

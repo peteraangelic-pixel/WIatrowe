@@ -1,23 +1,3 @@
 porównano 158 punktów (Rust vs Python)
-największa różnica: 2.010e-02 w ('counter', 15.0, 3.0)
-BŁĄD: 68 punktów poza tolerancją 1e-06:
-   counter      skala=15.0   lambda=3.0    rust=0.198627595 python=0.218727184 diff=2.010e-02
-   counter      skala=15.0   lambda=4.0    rust=0.320144743 python=0.324728960 diff=4.584e-03
-   counter      skala=15.0   lambda=5.5    rust=0.461621178 python=0.460793026 diff=8.282e-04
-   counter      skala=15.0   lambda=7.0    rust=0.527613288 python=0.537940269 diff=1.033e-02
-   counter      skala=15.0   lambda=9.0    rust=0.398472510 python=0.410394933 diff=1.192e-02
-   counter      skala=40.0   lambda=3.0    rust=0.198627595 python=0.218727184 diff=2.010e-02
-   counter      skala=40.0   lambda=4.0    rust=0.320144743 python=0.324728960 diff=4.584e-03
-   counter      skala=40.0   lambda=5.5    rust=0.461621178 python=0.460793026 diff=8.282e-04
-   counter      skala=40.0   lambda=7.0    rust=0.527613288 python=0.537940269 diff=1.033e-02
-   counter      skala=40.0   lambda=9.0    rust=0.398472510 python=0.410394933 diff=1.192e-02
-   dawt         skala=1.5    lambda=2.0    rust=0.447072632 python=0.441792901 diff=5.280e-03
-   dawt         skala=1.5    lambda=9.0    rust=0.652393769 python=0.650962346 diff=1.431e-03
-   dawt         skala=3.0    lambda=2.0    rust=0.447072632 python=0.441792901 diff=5.280e-03
-   dawt         skala=3.0    lambda=9.0    rust=0.652393769 python=0.650962346 diff=1.431e-03
-   farm18       skala=1.5    lambda=1.0    rust=0.171866029 python=0.165238791 diff=6.627e-03
-   farm18       skala=1.5    lambda=2.0    rust=0.308584756 python=0.309253018 diff=6.683e-04
-   farm18       skala=1.5    lambda=3.0    rust=-0.388626126 python=-0.386542903 diff=2.083e-03
-   farm18       skala=3.0    lambda=1.0    rust=0.171866029 python=0.165238791 diff=6.627e-03
-   farm18       skala=3.0    lambda=2.0    rust=0.308584756 python=0.309253018 diff=6.683e-04
-   farm18       skala=3.0    lambda=3.0    rust=-0.388626126 python=-0.386542903 diff=2.083e-03
+największa różnica: 0.000e+00 w None
+OK: implementacje zgodne w granicach tolerancji
