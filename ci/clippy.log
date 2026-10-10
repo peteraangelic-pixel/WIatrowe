@@ -74,8 +74,8 @@ help: change this to
 230 + fn apply_rating(d: &Design, curve: &mut [(f64, f64)]) -> (f64, f64) {
     |
 
-warning: `wiatrowe` (lib test) generated 14 warnings (10 duplicates)
+warning: `wiatrowe` (lib test) generated 14 warnings (12 duplicates)
 error: could not compile `wiatrowe` (lib test) due to 7 previous errors; 14 warnings emitted
 warning: build failed, waiting for other jobs to finish...
-warning: `wiatrowe` (lib) generated 14 warnings (4 duplicates)
+warning: `wiatrowe` (lib) generated 14 warnings (2 duplicates)
 error: could not compile `wiatrowe` (lib) due to 7 previous errors; 14 warnings emitted

@@ -2,12 +2,12 @@
     Updating crates.io index
      Locking 6 packages to highest compatible versions
  Downloading crates ...
-  Downloaded crossbeam-epoch v0.9.21
   Downloaded crossbeam-deque v0.8.8
   Downloaded either v1.19.0
   Downloaded rayon v1.12.0
   Downloaded crossbeam-utils v0.8.23
   Downloaded rayon-core v1.13.0
+  Downloaded crossbeam-epoch v0.9.21
    Compiling crossbeam-utils v0.8.23
    Compiling crossbeam-epoch v0.9.21
    Compiling crossbeam-deque v0.8.8
@@ -15,5 +15,5 @@
     Checking either v1.19.0
     Checking rayon v1.12.0
     Checking wiatrowe v0.1.0 (/home/runner/work/WIatrowe/WIatrowe)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 9.60s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 2.88s
 exit=0
