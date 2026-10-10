@@ -1,3 +1,14 @@
-[1m[92m    Finished[0m `release` profile [optimized] target(s) in 0.01s
-[1m[92m     Running[0m `target/release/wiatrowe --mode checksum --quality normal --out results`
-[wiatrowe] checksum: 272 punktów, suma Cp = 42.927598995
+[1m[92m   Compiling[0m wiatrowe v0.1.0 (/home/runner/work/WIatrowe/WIatrowe)
+[1m[91merror[0m[1m: unexpected closing delimiter: `}`[0m
+  [1m[94m--> [0msrc/shapes.rs:36:1
+   [1m[94m|[0m
+[1m[94m19[0m [1m[94m|[0m     for i in 0..n {
+   [1m[94m|[0m                   [1m[94m-[0m [1m[94mthe nearest open delimiter[0m
+[1m[94m...[0m
+[1m[94m33[0m [1m[94m|[0m         ));
+   [1m[94m|[0m          [1m[94m-[0m [1m[94mmissing open `(` for this delimiter[0m
+[1m[94m...[0m
+[1m[94m36[0m [1m[94m|[0m }
+   [1m[94m|[0m [1m[91m^[0m [1m[91munexpected closing delimiter[0m
+
+[1m[91merror[0m: could not compile `wiatrowe` (lib) due to 1 previous error
