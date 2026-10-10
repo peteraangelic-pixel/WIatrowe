@@ -461,7 +461,8 @@ fn assumptions() -> String {
         "Ceny: kompozyt 52 PLN/kg, stalowa wieża 8 PLN/kg, przekładnia 20-30 PLN/kg, elektronika 320 PLN/kW, BOS 1050 PLN/kW × czynnik montażu; kalibracja globalna 1.06 tak, by bazowy HAWT 5 MW wypadał ~5 000-6 000 PLN/kW.",
         "OPEX 95 PLN/kW/rok × czynnik dostępności (serwis przy ziemi: 0.55-0.60; lotny: 1.5), WACC 7%, czas życia 8-25 lat w zależności od koncepcji.",
         "Wiatr: Weibull k=2.0, średnia 6.5 m/s na 100 m, ścinanie potęgowe α=0.20 (premia za wysokość piasty i za 300 m latawca jest policzona jawnie).",
-        "Sterowanie: maszyny z regulacją kąta łopat utrzymują moc znamionową powyżej V_nom; bez regulacji moc rośnie dalej, więc generator i konstrukcja są przewymiarowane (to widać w koszcie).",
+        "Sterowanie: maszyny z regulacją kąta łopat utrzymują moc znamionową powyżej V_nom; maszyny bez regulacji (Savonius, wiatrak farmerski, lej, windbelt) są modelowane z ograniczeniem mocy do 1.2·P(V_nom) - w rzeczywistości robi to stall, odchylenie z wiatru albo hamulec generatora.",
+        "BEMT: równanie równowagi elementu rozwiązywane bisekcją po kącie napływu (z poprawką Glauerta na stan turbulent wake), a nie klasyczną iteracją a/a' - ta nie zbiega przy dużym obciążeniu i dawałaby wyniki zależne od kolejności zaokrągleń. Dzięki temu implementacja w Rust i w Pythonie dają identyczne liczby (sprawdzenie w CI: 272 punkty, różnica 0).",
         "Czego tu nie ma: aeroelastyki, zmęczenia materiałowego (poza prostymi czynnikami), hałasu, oddziaływania parku (wake losses), kosztów sieci systemowych, ryzyka technologicznego dla AWE/VIV (modele o niskiej pewności).",
     ];
     let mut s = String::new();
