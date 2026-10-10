@@ -1,11 +1,18 @@
 name: Export Rust toolchain
 
-# Pomocniczy workflow: pakuje toolchain stabilnego Rusta z runnera do artefaktu,
-# żeby można go było pobrać (`gh run download`) w środowisku bez dostępu do
-# static.rust-lang.org/crates.io. Używane tylko do lokalnego sprawdzania składni.
+# Pomocniczy workflow: pakuje toolchain stabilnego Rusta z runnera GitHuba do
+# artefaktu, żeby można go było pobrać (`gh run download`) i używać w
+# środowiskach bez dostępu do static.rust-lang.org / crates.io.
+# Używane wyłącznie do lokalnego sprawdzania składni i typów.
 
 on:
+  push:
+    paths:
+      - ".github/workflows/toolchain.yml"
   workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   export:
@@ -19,15 +26,22 @@ jobs:
           rustc --version
           cargo --version
 
-      - name: Pack toolchain
+      - name: Przygotuj vendorowany rayon (do budowania bez crates.io)
         run: |
           set -e
+          mkdir -p vendor-src
+          cargo new --lib rayon-fetch -q
+          cd rayon-fetch
+          cargo add rayon@1.10 -q
+          cargo fetch -q
+          cd ..
           mkdir -p "$GITHUB_WORKSPACE/tc"
           tar czf "$GITHUB_WORKSPACE/tc/rust-toolchain.tar.gz" -C "$HOME/.rustup/toolchains" .
+          tar czf "$GITHUB_WORKSPACE/tc/cargo-registry.tar.gz" -C "$HOME/.cargo/registry" .
           ls -lh "$GITHUB_WORKSPACE/tc"
 
       - uses: actions/upload-artifact@v4
         with:
           name: rust-toolchain
-          path: tc/rust-toolchain.tar.gz
+          path: tc/
           retention-days: 7
