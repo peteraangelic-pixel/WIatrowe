@@ -61,21 +61,21 @@ warning: useless use of `format!`
     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#useless_format
 
 warning: writing `&mut Vec` instead of `&mut [_]` involves a new object where a slice will do
-   --> src/sweep.rs:230:36
+   --> src/sweep.rs:236:36
     |
-230 | fn apply_rating(d: &Design, curve: &mut Vec<(f64, f64)>) -> (f64, f64) {
+236 | fn apply_rating(d: &Design, curve: &mut Vec<(f64, f64)>) -> (f64, f64) {
     |                                    ^^^^^^^^^^^^^^^^^^^^
     |
     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#ptr_arg
     = note: `#[warn(clippy::ptr_arg)]` on by default
 help: change this to
     |
-230 - fn apply_rating(d: &Design, curve: &mut Vec<(f64, f64)>) -> (f64, f64) {
-230 + fn apply_rating(d: &Design, curve: &mut [(f64, f64)]) -> (f64, f64) {
+236 - fn apply_rating(d: &Design, curve: &mut Vec<(f64, f64)>) -> (f64, f64) {
+236 + fn apply_rating(d: &Design, curve: &mut [(f64, f64)]) -> (f64, f64) {
     |
 
-warning: `wiatrowe` (lib test) generated 14 warnings (12 duplicates)
-error: could not compile `wiatrowe` (lib test) due to 7 previous errors; 14 warnings emitted
-warning: build failed, waiting for other jobs to finish...
-warning: `wiatrowe` (lib) generated 14 warnings (2 duplicates)
+warning: `wiatrowe` (lib) generated 14 warnings (1 duplicate)
 error: could not compile `wiatrowe` (lib) due to 7 previous errors; 14 warnings emitted
+warning: build failed, waiting for other jobs to finish...
+warning: `wiatrowe` (lib test) generated 14 warnings (13 duplicates)
+error: could not compile `wiatrowe` (lib test) due to 7 previous errors; 14 warnings emitted
