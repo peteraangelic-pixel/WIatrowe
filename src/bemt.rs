@@ -224,7 +224,6 @@ pub fn solve(rotor: &HawtRotor, cfg: &BemtCfg) -> BemtOut {
         }
 
         let sin_p = phi.sin().max(1e-4);
-        let cos_p = phi.cos();
         let f_tip = if b < 100.0 {
             let arg = -(b * (1.0 - x) / (2.0 * x * sin_p)).exp().min(1.0);
             (2.0 / std::f64::consts::PI) * arg.acos()
@@ -276,7 +275,7 @@ pub fn solve(rotor: &HawtRotor, cfg: &BemtCfg) -> BemtOut {
 /// przeszukaniem wokół najlepszego punktu - golden section).
 pub fn best_lambda(
     rotor: &HawtRotor,
-    n_stations: usize,
+    _n_stations: usize,
     lo: f64,
     hi: f64,
     steps: usize,

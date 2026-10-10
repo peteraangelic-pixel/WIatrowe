@@ -220,7 +220,7 @@ fn pill(lcoe: f64) -> String {
 }
 
 /// Raport HTML.
-pub fn write_html(path: &Path, v: &[Variant], designs: &[Design], meta: &[(&str, String)]) -> std::io::Result<()> {
+pub fn write_html(path: &Path, v: &[Variant], _designs: &[Design], meta: &[(&str, String)]) -> std::io::Result<()> {
     let mut o = String::new();
     o.push_str("<!DOCTYPE html><html lang=\"pl\"><head><meta charset=\"utf-8\">");
     o.push_str("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
@@ -390,7 +390,7 @@ pewność modelu.</p></header><main>"#,
             o,
             concat!(
                 r#"<div class="card"><div class="top"><div style="color:{col}">{}</div>"#,
-                r#"<div><h3>{}</h3><div class="fam">{} · {} {}</div></div></div>"#,
+                r#"<div><h3>{}</h3><div class="fam">{} · skala {} {}</div><div class="fam">kod: {}</div></div></div>"#,
                 r#"<div class="kv">"#,
                 r#"<div>Cp max</div><div>{}</div>"#,
                 r#"<div>λ opt</div><div>{}</div>"#,
@@ -456,7 +456,7 @@ pewność modelu.</p></header><main>"#,
 fn assumptions() -> String {
     let items = [
         "Aerodynamika: BEMT (Burton, poprawka Prandtla i Glauerta) dla wirników łopatowych, DMST (Paraschivoiu, ślad równowagowy) dla Darrieusa, krzywe empiryczne skalibrowane do zakresów z literatury dla Savoniusa i taśmy, wzór Loyda dla latawca, model pasma synchronizacji Strouhala dla VIV.",
-        "Cp odniesione jest do pola zakreślanego (lub pola wlotu dla leja / pola równoważnego dla latawca) - dlatego DAWT i latawiec mogą "przekraczać" Betza na polu wirnika, co nie łamie fizyki, bo liczone jest wtedy względem innego pola.",
+        "Cp odniesione jest do pola zakreślanego (lub pola wlotu dla leja / pola równoważnego dla latawca) - dlatego DAWT i latawiec mogą przekroczyć wartość Betza liczoną na polu wirnika, co nie łamie fizyki, bo liczone jest wtedy względem innego pola.",
         "Masa: łopata kompositowa 0.55·R^2.5 kg (NREL 5 MW ≈ 17.7 t), wieża z momentu wywracającego (≈320 t dla NREL 5 MW), fundament 8.5 kg/kNm, przekładnia+generator ≈ 45 kg/kW.",
         "Ceny: kompozyt 52 PLN/kg, stalowa wieża 8 PLN/kg, przekładnia 20-30 PLN/kg, elektronika 320 PLN/kW, BOS 1050 PLN/kW × czynnik montażu; kalibracja globalna 1.06 tak, by bazowy HAWT 5 MW wypadał ~5 000-6 000 PLN/kW.",
         "OPEX 95 PLN/kW/rok × czynnik dostępności (serwis przy ziemi: 0.55-0.60; lotny: 1.5), WACC 7%, czas życia 8-25 lat w zależności od koncepcji.",

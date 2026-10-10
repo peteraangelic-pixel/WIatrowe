@@ -227,9 +227,9 @@ fn interpolate(curve: &[(f64, f64)], v: f64) -> f64 {
 }
 
 /// Zastosowanie ograniczenia mocy znamionowej (regulacja kąta łopat).
-fn apply_rating(d: &Design, curve: &mut Vec<(f64, f64)>) -> (f64, f64, f64) {
-    let mut rated = 0.0;
+fn apply_rating(d: &Design, curve: &mut Vec<(f64, f64)>) -> (f64, f64) {
     let mut peak = 0.0;
+    let mut rated = 0.0;
     if d.ctrl.pitch_control {
         rated = interpolate(curve, d.ctrl.v_rated);
         for (_, p) in curve.iter_mut() {
@@ -247,7 +247,7 @@ fn apply_rating(d: &Design, curve: &mut Vec<(f64, f64)>) -> (f64, f64, f64) {
         }
         rated = peak;
     }
-    (rated, peak, rated)
+    (rated, peak)
 }
 
 /// Główne przeliczenie całego katalogu.
@@ -281,7 +281,7 @@ pub fn run(designs: &[Design], cfg: &SweepCfg) -> Vec<Variant> {
                 }
             }
             let mut curve = power_curve(d, &aero, lam, cfg);
-            let (rated_w, peak_w, _) = apply_rating(d, &mut curve);
+            let (rated_w, peak_w) = apply_rating(d, &mut curve);
 
             // Nacisk w punkcie znamionowym (do wieży i fundamentu).
             let v_thrust = if d.ctrl.pitch_control {
@@ -449,7 +449,7 @@ pub fn workload(designs: &[Design], cfg: &SweepCfg, repeat: usize) -> usize {
 /// Znormalizowany "score" do szybkiego rankingu (0-100).
 pub fn score(v: &Variant) -> f64 {
     let lcoe = clamp(v.econ.lcoe, 50.0, 5000.0);
-    let s_lcoe = 100.0 * (5000.0 / lcoe).ln() / (5000.0 / 50.0).ln();
+    let s_lcoe: f64 = 100.0 * (5000.0f64 / lcoe).ln() / (5000.0f64 / 50.0f64).ln();
     let cf = clamp(v.capacity_factor, 0.0, 0.9);
     let s_cf = 100.0 * cf / 0.9;
     let mat = clamp(v.econ.kwh_per_kg, 0.0, 400.0);

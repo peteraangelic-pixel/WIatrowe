@@ -137,7 +137,7 @@ pub fn line_chart(
         h = h
     ));
     o.push_str(&format!(
-        r#"<rect x="0" y="0" width="{w}" height="{h}" fill="#ffffff" rx="10"/>"#,
+        r#"<rect x="0" y="0" width="{w}" height="{h}" fill='#ffffff' rx="10"/>"#,
         w = w,
         h = h
     ));
@@ -146,13 +146,13 @@ pub fn line_chart(
     for t in nice_ticks(ylo, yhi, 5) {
         let y = sy(t);
         o.push_str(&format!(
-            r#"<line x1="{x0}" y1="{y}" x2="{x1}" y2="{y}" stroke="#e7ecf3" stroke-width="1"/>"#,
+            r#"<line x1="{x0}" y1="{y}" x2="{x1}" y2="{y}" stroke='#e7ecf3' stroke-width="1"/>"#,
             x0 = ml,
             x1 = ml + pw,
             y = y
         ));
         o.push_str(&format!(
-            r#"<text x="{x}" y="{y}" text-anchor="end" font-size="11" fill="#7b8794">{t}</text>"#,
+            r#"<text x="{x}" y="{y}" text-anchor="end" font-size="11" fill='#7b8794'>{t}</text>"#,
             x = ml - 8.0,
             y = y + 3.5,
             t = fmt_tick(t)
@@ -162,13 +162,13 @@ pub fn line_chart(
     for t in nice_ticks(xlo, xhi, 6) {
         let x = sx(t);
         o.push_str(&format!(
-            r#"<line x1="{x}" y1="{y0}" x2="{x}" y2="{y1}" stroke="#f1f4f8" stroke-width="1"/>"#,
+            r#"<line x1="{x}" y1="{y0}" x2="{x}" y2="{y1}" stroke='#f1f4f8' stroke-width="1"/>"#,
             x = x,
             y0 = mt,
             y1 = mt + ph
         ));
         o.push_str(&format!(
-            r#"<text x="{x}" y="{y}" text-anchor="middle" font-size="11" fill="#7b8794">{t}</text>"#,
+            r#"<text x="{x}" y="{y}" text-anchor="middle" font-size="11" fill='#7b8794'>{t}</text>"#,
             x = x,
             y = mt + ph + 16.0,
             t = fmt_tick(t)
@@ -176,26 +176,26 @@ pub fn line_chart(
     }
     // osie
     o.push_str(&format!(
-        r#"<line x1="{x}" y1="{y0}" x2="{x}" y2="{y1}" stroke="#c8d0da" stroke-width="1.2"/>"#,
+        r#"<line x1="{x}" y1="{y0}" x2="{x}" y2="{y1}" stroke='#c8d0da' stroke-width="1.2"/>"#,
         x = ml,
         y0 = mt,
         y1 = mt + ph
     ));
     o.push_str(&format!(
-        r#"<line x1="{x0}" y1="{y}" x2="{x1}" y2="{y}" stroke="#c8d0da" stroke-width="1.2"/>"#,
+        r#"<line x1="{x0}" y1="{y}" x2="{x1}" y2="{y}" stroke='#c8d0da' stroke-width="1.2"/>"#,
         x0 = ml,
         x1 = ml + pw,
         y = mt + ph
     ));
     // opisy osi
     o.push_str(&format!(
-        r#"<text x="{x}" y="{y}" text-anchor="middle" font-size="12" fill="#4a5568">{l}</text>"#,
+        r#"<text x="{x}" y="{y}" text-anchor="middle" font-size="12" fill='#4a5568'>{l}</text>"#,
         x = ml + pw / 2.0,
         y = h - 8.0,
         l = esc(xlabel)
     ));
     o.push_str(&format!(
-        r#"<text x="12" y="{y}" text-anchor="start" font-size="12" fill="#4a5568" transform="rotate(-90 12 {y})">{l}</text>"#,
+        r#"<text x="12" y="{y}" text-anchor="start" font-size="12" fill='#4a5568' transform="rotate(-90 12 {y})">{l}</text>"#,
         y = mt + ph / 2.0,
         l = esc(ylabel)
     ));
@@ -241,7 +241,7 @@ pub fn line_chart(
             ));
             let name: String = esc(&s.name).chars().take(26).collect();
             o.push_str(&format!(
-                r#"<text x="{x}" y="{y}" font-size="11.5" fill="#3d4753">{n}</text>"#,
+                r#"<text x="{x}" y="{y}" font-size="11.5" fill='#3d4753'>{n}</text>"#,
                 x = ml + pw + 32.0,
                 y = ly + 10.0,
                 n = name
@@ -272,12 +272,12 @@ pub fn bar_chart(w: f64, items: &[(String, f64, String)], unit: &str, title: &st
         h = h
     ));
     o.push_str(&format!(
-        r#"<rect x="0" y="0" width="{w}" height="{h}" fill="#ffffff" rx="10"/>"#,
+        r#"<rect x="0" y="0" width="{w}" height="{h}" fill='#ffffff' rx="10"/>"#,
         w = w,
         h = h
     ));
     o.push_str(&format!(
-        r#"<text x="14" y="22" font-size="13" font-weight="600" fill="#2d3748">{t}</text>"#,
+        r#"<text x="14" y="22" font-size="13" font-weight="600" fill='#2d3748'>{t}</text>"#,
         t = esc(title)
     ));
     for (i, (label, v, color)) in items.iter().enumerate() {
@@ -285,7 +285,7 @@ pub fn bar_chart(w: f64, items: &[(String, f64, String)], unit: &str, title: &st
         let bw = (v / max) * pw;
         let lbl: String = esc(label).chars().take(34).collect();
         o.push_str(&format!(
-            r#"<text x="{x}" y="{y}" font-size="11.5" fill="#3d4753">{l}</text>"#,
+            r#"<text x="{x}" y="{y}" font-size="11.5" fill='#3d4753'>{l}</text>"#,
             x = ml - 10.0,
             y = y + 13.0,
             l = lbl
@@ -298,7 +298,7 @@ pub fn bar_chart(w: f64, items: &[(String, f64, String)], unit: &str, title: &st
             c = color
         ));
         o.push_str(&format!(
-            r#"<text x="{x}" y="{y}" font-size="11.5" fill="#5a6472">{v} {u}</text>"#,
+            r#"<text x="{x}" y="{y}" font-size="11.5" fill='#5a6472'>{v} {u}</text>"#,
             x = ml + bw.max(1.0) + 8.0,
             y = y + 13.0,
             v = fmt_tick(*v),

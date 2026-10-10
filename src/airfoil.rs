@@ -101,7 +101,7 @@ impl Foil {
 
     /// Maksymalna jakość aerodynamiczna cl/cd (do raportowania).
     pub fn max_glide(&self) -> f64 {
-        let mut best = 0.0;
+        let mut best: f64 = 0.0;
         let mut i = -10.0;
         while i <= 20.0 {
             let a = i;
