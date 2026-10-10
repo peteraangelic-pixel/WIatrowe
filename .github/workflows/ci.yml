@@ -52,7 +52,7 @@ jobs:
           for i in 1 2 3 4 5; do
             if git push; then echo "zapisano"; exit 0; fi
             echo "push odrzucony - doscigam branch (proba $i)"
-            git pull --rebase origin "${ github.ref_name }" || true
+            git pull --rebase origin "${{ github.ref_name }}" || true
             sleep 5
           done
           echo "nie udalo sie zapisac wynikow"
