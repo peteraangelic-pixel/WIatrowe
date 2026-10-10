@@ -1,0 +1,52 @@
+[1m[92m    Updating[0m crates.io index
+[1m[92m     Locking[0m 6 packages to highest compatible versions
+[1m[92m Downloading[0m crates ...
+[1m[92m  Downloaded[0m crossbeam-deque v0.8.8
+[1m[92m  Downloaded[0m crossbeam-epoch v0.9.21
+[1m[92m  Downloaded[0m either v1.19.0
+[1m[92m  Downloaded[0m crossbeam-utils v0.8.23
+[1m[92m  Downloaded[0m rayon-core v1.13.0
+[1m[92m  Downloaded[0m rayon v1.12.0
+[1m[92m   Compiling[0m crossbeam-utils v0.8.23
+[1m[92m   Compiling[0m crossbeam-epoch v0.9.21
+[1m[92m   Compiling[0m crossbeam-deque v0.8.8
+[1m[92m   Compiling[0m rayon-core v1.13.0
+[1m[92m   Compiling[0m either v1.19.0
+[1m[92m   Compiling[0m rayon v1.12.0
+[1m[92m   Compiling[0m wiatrowe v0.1.0 (/home/runner/work/WIatrowe/WIatrowe)
+[1m[92m    Finished[0m `release` profile [optimized] target(s) in 20.63s
+[1m[92m     Running[0m `target/release/wiatrowe --mode sweep --quality normal --out results`
+
+[wiatrowe] przeliczono 70 wariantów (70 skal) w 0.72 s · 4 wątków rayon · ~12670 ewaluacji
+wariant                                  skala   moc kW      Cp     CF   AEP MWh   zł/kW      LCOE   kWh/kg
+------------------------------------------------------------------------------------------------------------
+Trójłopatowy HAWT (punkt odnie [hawt3]    90.0    12196   0.487  0.280     29923    4829       208      7.6
+Dwułopatowy HAWT               [hawt2]    90.0    12133   0.484  0.281     29830    4848       208      7.5
+Przeciwbieżny dwuwirnikowy     [counter]    90.0    13369   0.534  0.280     32844    4864       209      7.1
+Trójłopatowy HAWT (punkt odnie [hawt3]    63.0     5976   0.487  0.244     12755    4249       215      8.5
+Dwułopatowy HAWT               [hawt2]    63.0     5945   0.484  0.244     12703    4263       216      8.4
+Przeciwbieżny dwuwirnikowy     [counter]    63.0     6551   0.534  0.244     13992    4269       216      8.0
+Sześciołopatowy (wolnoobrotowy [hawt6]    63.0     5865   0.487  0.229     11766    4132       224      9.4
+Darrieus troposkien („ubijaczk [troposkien]    40.0     2164   0.349  0.123      2335    2123       239     13.0
+Trójłopatowy HAWT (punkt odnie [hawt3]    40.0     2409   0.487  0.203      4274    3878       241      9.4
+Przeciwbieżny dwuwirnikowy     [counter]    40.0     2641   0.534  0.203      4687    3884       241      8.8
+Dwułopatowy HAWT               [hawt2]    40.0     2397   0.484  0.203      4254    3888       241      9.3
+Darrieus helikalny (skręcone ł [helical]    40.0     2175   0.374  0.119      2269    2155       250     12.7
+Sześciołopatowy (wolnoobrotowy [hawt6]    40.0     2364   0.487  0.190      3943    3841       255     10.2
+Jednołopatowy z przeciwwagą    [hawt1]    40.0     2681   0.479  0.183      4299    3849       265      8.5
+Przeciwbieżny dwuwirnikowy     [counter]    15.0      371   0.534  0.138       448    3683       341      9.3
+Trójłopatowy HAWT (punkt odnie [hawt3]    15.0      339   0.487  0.138       408    3701       342      9.8
+Dwułopatowy HAWT               [hawt2]    15.0      337   0.484  0.138       406    3708       343      9.7
+Darrieus troposkien („ubijaczk [troposkien]    20.0      541   0.349  0.086       409    2173       347     10.7
+Darrieus helikalny (skręcone ł [helical]    20.0      544   0.374  0.083       398    2199       362     10.4
+Sześciołopatowy (wolnoobrotowy [hawt6]    15.0      332   0.487  0.128       372    3677       367     10.4
+Jednołopatowy z przeciwwagą    [hawt1]    15.0      377   0.479  0.120       396    3633       388      8.9
+Hybryda Darrieus + Savonius    [hybrid]    20.0      476   0.327  0.083       348    2726       430      8.7
+Darrieus H-rotor (3 proste łop [hrotor]    40.0     2161   0.372  0.119      2255    5026       509      4.5
+Trójłopatowy HAWT (punkt odnie [hawt3]     5.0       38   0.487  0.099        33    4046       509      6.4
+
+[wiatrowe] wyniki zapisane do "results"
+
+Najniższe LCOE: Trójłopatowy HAWT (punkt odniesienia) (12196 kW, 208 PLN/MWh, skala 90.0 R [m])
+Najwyższe Cp: Wirnik w dyfuzorze z kołnierzem (DAWT) (Cp=0.693, λ=3.17)
+Najwięcej energii z kg materiału: Darrieus troposkien („ubijaczka”) (13.0 kWh/kg·rok)

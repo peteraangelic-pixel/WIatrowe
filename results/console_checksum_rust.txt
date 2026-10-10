@@ -1,0 +1,3 @@
+[1m[92m    Finished[0m `release` profile [optimized] target(s) in 0.01s
+[1m[92m     Running[0m `target/release/wiatrowe --mode checksum --quality normal --out results`
+[wiatrowe] checksum: 272 punktów, suma Cp = 36.309800704
