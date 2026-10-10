@@ -36,7 +36,7 @@ jobs:
         continue-on-error: true
         run: |
           mkdir -p ci
-          { echo "### cargo clippy"; cargo clippy --all-targets 2>&1 | tail -80; } | tee ci/clippy.log
+          { echo "### cargo clippy"; cargo clippy --all-targets 2>&1; echo "exit=$?"; } | tee ci/clippy.log
 
       - name: Zapisz wyniki na branchu
         if: github.event_name == 'push'
