@@ -67,8 +67,8 @@ warning: useless use of `format!`
     |
     = help: for further information visit https://rust-lang.github.io/rust-clippy/rust-1.99.0/index.html#useless_format
 
-warning: `wiatrowe` (lib test) generated 6 warnings (1 duplicate) (run `cargo clippy --fix --lib -p wiatrowe --tests -- ` to apply 5 suggestions)
-warning: `wiatrowe` (lib) generated 6 warnings (5 duplicates) (run `cargo clippy --fix --lib -p wiatrowe -- ` to apply 1 suggestion)
+warning: `wiatrowe` (lib test) generated 6 warnings (4 duplicates) (run `cargo clippy --fix --lib -p wiatrowe --tests -- ` to apply 2 suggestions)
+warning: `wiatrowe` (lib) generated 6 warnings (2 duplicates) (run `cargo clippy --fix --lib -p wiatrowe -- ` to apply 4 suggestions)
 warning: manual implementation of `Option::map`
   --> src/main.rs:83:16
    |
@@ -92,7 +92,7 @@ help: try
 86 ~                 .expect("nie można utworzyć puli wątków"));
    |
 
-warning: `wiatrowe` (bin "wiatrowe") generated 1 warning (run `cargo clippy --fix --bin "wiatrowe" -p wiatrowe -- ` to apply 1 suggestion)
 warning: `wiatrowe` (bin "wiatrowe" test) generated 1 warning (1 duplicate)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.92s
+warning: `wiatrowe` (bin "wiatrowe") generated 1 warning (run `cargo clippy --fix --bin "wiatrowe" -p wiatrowe -- ` to apply 1 suggestion)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.17s
 exit=0

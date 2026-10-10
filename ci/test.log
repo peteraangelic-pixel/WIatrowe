@@ -6,22 +6,22 @@
    Compiling rayon-core v1.13.0
    Compiling rayon v1.12.0
    Compiling wiatrowe v0.1.0 (/home/runner/work/WIatrowe/WIatrowe)
-    Finished `test` profile [unoptimized + debuginfo] target(s) in 1.78s
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 2.76s
      Running unittests src/lib.rs (target/debug/deps/wiatrowe-77c20b275a126b1a)
 
 running 25 tests
-test airfoil::tests::foil_glide_ratio_in_range ... ok
 test airfoil::tests::foil_attached_slope_is_sane ... ok
-test airfoil::tests::foil_stalls ... ok
 test airfoil::tests::magnus_saturates ... ok
+test airfoil::tests::foil_glide_ratio_in_range ... ok
+test airfoil::tests::foil_stalls ... ok
 test bemt::tests::ct_in_physical_range ... ok
 test bemt::tests::cp_respects_betz ... ok
-test bemt::tests::more_blades_shift_optimum_down ... ok
+test bemt::tests::cp_peak_is_realistic ... ok
 test climate::tests::shear_increases_with_height ... ok
 test cost::tests::baseline_utility_hawt_lands_in_known_cost_band ... ok
 test cost::tests::tower_mass_matches_nrel_reference ... ok
 test cost::tests::vawt_uses_much_less_foundation_than_hawt ... ok
-test bemt::tests::cp_peak_is_realistic ... ok
+test bemt::tests::more_blades_shift_optimum_down ... ok
 test designs::tests::every_design_builds_and_produces_sane_area ... ok
 test designs::tests::three_blade_beats_one_blade_on_cp ... ok
 test dmst::tests::darrieus_does_not_self_start ... ok
@@ -33,10 +33,10 @@ test simple::tests::savonius_is_in_literature_range ... ok
 test simple::tests::venturi_never_beats_betz_per_inlet_area ... ok
 test simple::tests::viv_has_narrow_band ... ok
 test dmst::tests::higher_solidity_lowers_optimal_tsr ... ok
-test climate::tests::pdf_integrates_to_one ... ok
 test climate::tests::mean_of_distribution_matches_input ... ok
+test climate::tests::pdf_integrates_to_one ... ok
 
-test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.26s
+test result: ok. 25 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.41s
 
      Running unittests src/main.rs (target/debug/deps/wiatrowe-dd2e58c5828b3abe)
 
@@ -48,6 +48,6 @@ test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; fini
 
 running 0 tests
 
-test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.00s
+test result: ok. 0 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.01s
 
 exit=0
