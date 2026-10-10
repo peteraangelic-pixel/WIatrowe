@@ -1,0 +1,12 @@
+
+[wiatrowe] benchmark rayon - 4 wątków sprzętowych
+    wątki     czas [s]    przysp.  efektywność      ewaluacji
+        1      15.7051       1.00         100%         137200
+BENCH_RESULT lang=rust threads=1 time_s=15.7051 evals=137200 evals_per_s=8736.0
+        2       7.8891       1.99         100%         137200
+BENCH_RESULT lang=rust threads=2 time_s=7.8891 evals=137200 evals_per_s=17391.1
+        4       5.2445       2.99          75%         137200
+BENCH_RESULT lang=rust threads=4 time_s=5.2445 evals=137200 evals_per_s=26160.9
+
+Razem wykonano ok. 137200 ewaluacji modelu aerodynamicznego (BEMT/DMST/empiryczne).
+Ten sam workload w Pythonie: `python3 tools/reference_sweep.py --repeat 40` (porównanie w CI).
