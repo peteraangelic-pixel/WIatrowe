@@ -107,10 +107,13 @@ czysty Python bez numpy) na 4-rdzeniowym runnerze GitHub Actions:
 
 | implementacja | wątki | czas [s] | ewaluacji/s | przyspieszenie |
 |---|---|---|---|---|
-| Python (referencyjna) | 1 | 24,91 | 275 | 1,0× |
-| **Rust + rayon** | 1 | 15,71 | 8 736 | **31,7×** |
-| **Rust + rayon** | 2 | 7,89 | 17 391 | **63,2×** |
-| **Rust + rayon** | 4 | 5,25 | 26 161 | **95,0×** |
+| Python (referencyjna) | 1 | 25,52 | 269 | 1,0× |
+| **Rust + rayon** | 1 | 15,79 | 8 689 | **32,3×** |
+| **Rust + rayon** | 2 | 7,90 | 17 369 | **64,6×** |
+| **Rust + rayon** | 4 | 5,26 | 26 077 | **97,0×** |
+
+(liczby z jednego uruchomienia na 4-rdzeniowym runnerze; między uruchomieniami
+zmieniają się o kilka procent, rząd wielkości jest stały)
 
 `results/bench_summary.txt`. Złota reguła: cały katalog 70 wariantów liczy się
 **0,73 s** – 25 testów + sweep + benchmark + walidacja mieszczą się w jednym
