@@ -217,7 +217,9 @@ pub fn solve(rotor: &HawtRotor, cfg: &BemtCfg) -> BemtOut {
                 break;
             }
         }
-        if !ok {
+        if !ok || a > 0.5 {
+            // a > 0.5 oznacza wyjście poza zakres ważności teorii pędu
+            // (stan "turbulent wake") - wynik tego elementu jest niewiarygodny.
             converged = false;
         }
 

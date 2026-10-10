@@ -56,13 +56,13 @@ impl SavoniusSpec {
         rb * arc * self.height * self.n_buckets as f64
     }
 
-    /// Szczytowy Cp (kalibracja: ~0.19 dla klasycznego Savoniusa z tarczami).
+    /// Szczytowy Cp (kalibracja: ~0.16-0.22 dla klasycznego Savoniusa z tarczami).
     fn cp_max(&self) -> f64 {
         // Optimum kąta łuku ~ 135 deg; 3 łopaty nieco gorsze od 2.
         let arc_f = 1.0 - 0.35 * ((self.arc_deg - 135.0) / 60.0).powi(2);
         let n_f = if self.n_buckets == 2 { 1.0 } else { 0.92 };
         let ov_f = 1.0 + 0.18 * clamp(self.overlap / 0.15, 0.0, 1.0);
-        0.19 * arc_f.max(0.6) * n_f * ov_f * self.endplate_gain
+        0.16 * arc_f.max(0.6) * n_f * ov_f * self.endplate_gain
     }
 
     /// Wolna prędkość ("luzem") - Savonius "ucieka" przy lambda ~ 2.

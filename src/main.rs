@@ -238,6 +238,13 @@ fn bench(all: &[wiatrowe::designs::Design], cfg: &SweepCfg, repeat: usize) {
             100.0 * (base / dt) / c as f64,
             evals
         );
+        println!(
+            "BENCH_RESULT lang=rust threads={} time_s={:.4} evals={} evals_per_s={:.1}",
+            c,
+            dt,
+            evals,
+            evals as f64 / dt
+        );
     }
     println!(
         "\nRazem wykonano ok. {} ewaluacji modelu aerodynamicznego (BEMT/DMST/empiryczne).",

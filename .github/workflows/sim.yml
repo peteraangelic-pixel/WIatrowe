@@ -1,0 +1,91 @@
+name: Symulacja + benchmark
+
+# Główny workflow:
+#   1) przelicza cały katalog wariantów (Rust + rayon) i generuje raport HTML,
+#      CSV i JSON (zapisywane z powrotem na branchu, w katalogu results/),
+#   2) sprawdza krzyżowo wyniki Rusta z referencyjną implementacją w Pythonie,
+#   3) robi benchmark Rust (rayon, 1..N wątków) vs Python (1 wątek) i wypisuje
+#      porównanie do podsumowania joba.
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  simulate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref }}
+
+      - name: Informacje o maszynie
+        run: |
+          echo "wątki CPU: $(nproc)"
+          rustc --version
+          cargo --version
+          python3 --version
+
+      - name: Przeliczenie katalogu (sweep)
+        run: cargo run --release -- --mode sweep --quality normal --out results
+
+      - name: Liczby kontrolne (Rust)
+        run: cargo run --release -- --mode checksum --quality normal --out results
+
+      - name: Liczby kontrolne (Python - implementacja referencyjna)
+        run: python3 tools/reference_sweep.py --mode checksum --quality normal --out results
+
+      - name: Porównanie Rust vs Python (poprawność modelu)
+        run: python3 tools/compare_checksums.py results/checksums.csv results/checksums_python.csv --tol 1e-6
+
+      - name: Benchmark Rust (rayon)
+        run: |
+          cargo run --release -- --mode bench --repeat 40 | tee results/bench_rust.txt
+
+      - name: Benchmark Python
+        run: |
+          python3 tools/reference_sweep.py --mode bench --repeat 2 | tee results/bench_python.txt
+
+      - name: Zestawienie prędkości
+        run: |
+          python3 tools/compare_bench.py results/bench_rust.txt results/bench_python.txt \
+            | tee results/bench_summary.txt
+
+      - name: Podsumowanie w jobie
+        run: |
+          {
+            echo "## Wyniki symulacji"
+            echo '```'
+            head -30 results/summary.csv | cut -c1-200
+            echo '```'
+            echo "## Benchmark"
+            echo '```'
+            cat results/bench_summary.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wyniki-wiatrowe
+          path: results/
+
+      - name: Zapisz wyniki na branchu
+        if: github.event_name == 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add results
+          if git diff --cached --quiet; then
+            echo "brak zmian"
+          else
+            git commit -m "wyniki: przeliczenie katalogu + benchmark [skip ci]"
+            git push
+          fi

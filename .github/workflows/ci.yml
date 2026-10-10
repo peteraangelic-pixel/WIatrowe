@@ -1,0 +1,52 @@
+name: Check & test
+
+# Kompiluje i testuje kod Rusta na każdym pushu.
+# Logi są zapisywane do katalogu `ci/` i commitowane na branch - dzięki temu
+# można je przeczytać także ze środowisk, w których logi Actions nie są
+# dostępne (artefakty/logi leżą na niedostępnej sieci).
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: cargo check
+        continue-on-error: true
+        run: |
+          mkdir -p ci
+          { echo "### cargo check --all-targets"; cargo check --all-targets 2>&1; echo "exit=$?"; } | tee ci/check.log
+
+      - name: cargo test
+        continue-on-error: true
+        run: |
+          mkdir -p ci
+          { echo "### cargo test"; cargo test 2>&1; echo "exit=$?"; } | tee ci/test.log
+
+      - name: clippy
+        continue-on-error: true
+        run: |
+          mkdir -p ci
+          { echo "### cargo clippy"; cargo clippy --all-targets 2>&1 | tail -80; } | tee ci/clippy.log
+
+      - name: Zapisz logi na branchu
+        if: github.event_name == 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -f ci
+          if git diff --cached --quiet; then
+            echo "brak zmian w logach"
+          else
+            git commit -m "ci: logi kompilacji i testów [skip ci]"
+            git push
+          fi

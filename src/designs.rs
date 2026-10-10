@@ -11,6 +11,11 @@ use crate::dmst::{self, DarrieusRotor};
 use crate::simple::{BeltSpec, KiteSpec, SavoniusSpec, VenturiSpec, VivSpec};
 use crate::{clamp, BETZ, RHO};
 
+/// Maksymalny *realny* przyrost mocy z układu dwuwirnikowego (oba wirniki
+/// dzielą tę samą strugę, więc nie ma "darmowej" mocy; literatura podaje
+/// typowo +5...+15% dla przeciwbieżnych układów).
+pub const COUNTER_MAX_GAIN: f64 = 0.12;
+
 // ----------------------------------------------------------- typy pomocnicze --
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -303,19 +308,27 @@ impl Aero {
                 let mut cp = (o.cp - o.cp_spin) * (1.0 - s.parasitic);
                 let mut ct = o.ct;
                 if s.counter_rotating {
-                    // Drugi wirnik w śladzie: V2 = V*(1 - 1.5 a) (bliski ślad),
-                    // plus odzysk części energii ruchu wirowego.
+                    // Drugi wirnik pracuje w dalekim śladzie: V2 = V*(1 - 2a).
+                    // Ma własne przełożenie, więc dobieramy mu sensowne lambda
+                    // (nie musi kręcić się z tą samą prędkością co pierwszy).
                     let a = 0.5 * (1.0 - (1.0 - o.ct.min(0.96)).max(0.0).sqrt());
-                    let vr = (1.0 - 1.5 * a).max(0.15);
-                    let cfg2 = BemtCfg {
-                        lambda: lambda / vr,
-                        ..cfg
+                    let vr = (1.0 - 2.0 * a).max(0.15);
+                    let lam2 = clamp(lambda / vr, 3.0, 8.0);
+                    let mut rot2 = s.rotor.clone();
+                    rot2.lambda_design = lam2;
+                    let cfg2 = BemtCfg { lambda: lam2, ..cfg };
+                    let o2 = bemt::solve(&rot2, &cfg2);
+                    let base = (o.cp - o.cp_spin) * (1.0 - s.parasitic);
+                    let bonus = if o2.converged {
+                        o2.cp.clamp(-0.5, BETZ) * vr.powi(3)
+                    } else {
+                        0.0
                     };
-                    let o2 = bemt::solve(&s.rotor, &cfg2);
-                    cp += o2.cp * vr.powi(3) + s.counter_gain * o.cp_swirl;
+                    cp += bonus + s.counter_gain * o.cp_swirl;
+                    cp = cp.min(base * (1.0 + COUNTER_MAX_GAIN));
                     ct = (ct + o2.ct * vr * vr).min(1.6);
                 }
-                cp = cp.clamp(-0.5, 2.0 * BETZ);
+                cp = cp.min(BETZ).clamp(-0.5, BETZ);
                 let area = std::f64::consts::PI * s.rotor.radius * s.rotor.radius;
                 AeroOut {
                     power: q * area * cp,
@@ -328,16 +341,20 @@ impl Aero {
             Aero::Ducted(s) => {
                 let mut rv = 1.0 + s.concentration_eff * (s.beta - 1.0);
                 if s.flange {
-                    rv += 0.25;
+                    rv += 0.15;
                 }
                 let rv = clamp(rv, 1.0, 2.6);
+                // Łopatę skręcamy dla przepływu, który faktycznie widzi
+                // (V_rot = rv * V_inf), a nie dla prędkości niezakłóconej.
+                let mut rotor = s.rotor.clone();
+                rotor.lambda_design = lambda / rv;
                 let cfg = BemtCfg {
                     lambda: lambda / rv,
                     pitch_deg: 0.0,
                     n_stations: g.n_stations,
                     spin_ratio: 0.0,
                 };
-                let o = bemt::solve(&s.rotor, &cfg);
+                let o = bemt::solve(&rotor, &cfg);
                 let cp_local = (o.cp - o.cp_spin) * (1.0 - s.parasitic);
                 // Suﬁt: Cp(inlet) <= BETZ * beta * sprawnosc dyfuzora
                 let cap = BETZ * s.beta * s.duct_eff;
@@ -370,6 +387,10 @@ impl Aero {
                 };
                 let cp_guess = 0.45;
                 let rv = s.velocity_ratio(cp_guess);
+                let rotor = HawtRotor {
+                    lambda_design: (lambda / rv).max(0.5),
+                    ..rotor
+                };
                 let cfg = BemtCfg {
                     lambda: lambda / rv,
                     pitch_deg: 0.0,
@@ -622,8 +643,8 @@ fn build_dawt(r: f64) -> Aero {
         beta: 2.6,
         flange: true,
         length_frac: 0.9,
-        concentration_eff: 0.34,
-        duct_eff: 0.62,
+        concentration_eff: 0.18,
+        duct_eff: 0.45,
         parasitic: 0.03,
     })
 }
@@ -778,7 +799,7 @@ fn build_magnus(r: f64) -> Aero {
             thickness_frac: 1.0, // cylinder: "grubość" = średnica
         },
         magnus: true,
-        spin_ratio: 2.0,
+        spin_ratio: 1.2,
         counter_rotating: false,
         counter_gain: 0.0,
         parasitic: 0.04,
@@ -1067,15 +1088,15 @@ pub fn catalog() -> Vec<Design> {
             hub_base: 6.0,
             hub_per_scale: 1.2,
             ctrl: Ctrl {
-                lambda_lo: 1.0,
-                lambda_hi: 8.0,
+                lambda_lo: 0.5,
+                lambda_hi: 6.0,
                 tip_speed_max: 80.0,
                 pitch_control: true,
                 v_rated: 12.0,
                 v_in: 2.5,
                 v_out: 25.0,
                 spin_lo: 0.4,
-                spin_hi: 3.5,
+                spin_hi: 2.5,
             },
             spacing_x: 4.0,
             spacing_y: 3.0,
