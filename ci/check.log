@@ -2,12 +2,12 @@
     Updating crates.io index
      Locking 6 packages to highest compatible versions
  Downloading crates ...
-  Downloaded either v1.19.0
+  Downloaded rayon v1.12.0
   Downloaded crossbeam-deque v0.8.8
+  Downloaded either v1.19.0
   Downloaded crossbeam-epoch v0.9.21
   Downloaded crossbeam-utils v0.8.23
   Downloaded rayon-core v1.13.0
-  Downloaded rayon v1.12.0
    Compiling crossbeam-utils v0.8.23
    Compiling crossbeam-epoch v0.9.21
    Compiling crossbeam-deque v0.8.8
@@ -15,5 +15,18 @@
     Checking either v1.19.0
     Checking rayon v1.12.0
     Checking wiatrowe v0.1.0 (/home/runner/work/WIatrowe/WIatrowe)
-    Finished `dev` profile [unoptimized + debuginfo] target(s) in 22.75s
-exit=0
+error: unexpected closing delimiter: `}`
+  --> src/shapes.rs:36:1
+   |
+19 |     for i in 0..n {
+   |                   - the nearest open delimiter
+...
+33 |         ));
+   |          - missing open `(` for this delimiter
+...
+36 | }
+   | ^ unexpected closing delimiter
+
+error: could not compile `wiatrowe` (lib) due to 1 previous error
+warning: build failed, waiting for other jobs to finish...
+error: could not compile `wiatrowe` (lib test) due to 1 previous error
