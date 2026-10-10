@@ -1,0 +1,23 @@
+[package]
+name = "wiatrowe"
+version = "0.1.0"
+edition = "2021"
+authors = ["WIatrowe contributors"]
+description = "Symulator alternatywnych geometrii elektrowni wiatrowych (BEMT / DMST) + model kosztowo-ekonomiczny, zrownoleglony rayon"
+license = "MIT"
+readme = "README.md"
+keywords = ["wind", "turbine", "bem", "darrieus", "rayon"]
+categories = ["science", "simulation"]
+
+[dependencies]
+rayon = "1.10"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+panic = "abort"
+
+[profile.bench]
+opt-level = 3
+lto = "thin"

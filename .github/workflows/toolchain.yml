@@ -1,0 +1,33 @@
+name: Export Rust toolchain
+
+# Pomocniczy workflow: pakuje toolchain stabilnego Rusta z runnera do artefaktu,
+# żeby można go było pobrać (`gh run download`) w środowisku bez dostępu do
+# static.rust-lang.org/crates.io. Używane tylko do lokalnego sprawdzania składni.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install stable toolchain
+        run: |
+          rustup toolchain install stable --profile minimal --no-self-update
+          rustc --version
+          cargo --version
+
+      - name: Pack toolchain
+        run: |
+          set -e
+          mkdir -p "$GITHUB_WORKSPACE/tc"
+          tar czf "$GITHUB_WORKSPACE/tc/rust-toolchain.tar.gz" -C "$HOME/.rustup/toolchains" .
+          ls -lh "$GITHUB_WORKSPACE/tc"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rust-toolchain
+          path: tc/rust-toolchain.tar.gz
+          retention-days: 7
